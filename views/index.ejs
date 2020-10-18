@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Group Chat on Node.js</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font: 13px Helvetica, Arial; background: #282828;;}
+        form { background: #3500d3; padding: 14px; position: fixed; bottom: 0; width: 100%;}
+        form input { padding: 10px; width: 85%; margin-right: .5%; }
+        form button { background: #282828; border-radius: 40px ; color: white;border: none; padding: 10px; margin-left: 2%; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; color: white;}
+        #messages li:nth-child(odd) { background: #eee; color: black; }
+    </style>
+    <script src="../../socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="/" method="POST" id="chatForm">
+      <input id="txt" autocomplete="off" autofocus="on" oninput="isTyping()" placeholder="Escribe aquí..." /><button>></button>
+    </form>
+    <script>
+            var socket = io.connect('http://localhost:8080');
+            // submit text message without reload/refresh the page
+            $('form').submit(function(e){
+                e.preventDefault(); // prevents page reloading
+                socket.emit('chat_message', $('#txt').val());
+                $('#txt').val('');
+                return false;
+            });
+            // append the chat text message
+            socket.on('chat_message', function(msg){
+                $('#messages').append($('<li>').html(msg));
+            });
+            // append text if someone is online
+            socket.on('is_online', function(username) {
+                $('#messages').append($('<li>').html(username));
+            });
+            // ask username
+            var username = prompt('¿Cómo te llamas?');
+            socket.emit('usuario', username);
+    </script>
+  </body>
+</html>
